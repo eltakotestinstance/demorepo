@@ -1,0 +1,29 @@
+name: create_test_repo
+on:
+  workflow_dispatch:
+            
+permissions: write-all
+jobs:
+  create_test_repo:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+      - name: Create test repo
+        
+        run: |
+            echo "GH_TOKEN value is: $GH_TOKEN"
+            gh api -X POST repos/$vorlagenRepo/generate \
+            --field name=test-repo \
+            --field description="Test repo" \
+            --field private=false \
+            --field include_all_branches=true \
+            --field owner=eltakotestinstance            
+    env :
+      GH_TOKEN: ${{ secrets.PERSONAL_TOKEN_GITHUB }}
+      vorlagenRepo: "eltakotestinstance/test-template-repo"
+    
+      
+        

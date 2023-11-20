@@ -1,0 +1,23 @@
+name: Delete Workflows after initial workflow
+on:
+  workflow_dispatch:
+    inputs:
+      workflow_id:
+        description: 'Workflow ID'
+        required: true
+        
+permissions: write-all
+jobs:
+  delete-workflows:
+    runs-on: ubuntu-latest
+    
+    steps: 
+      - name: git checkout
+        uses: actions/checkout@v2
+      - name: Delete Workflows
+        run: |
+          REPO=${{ github.repository }}
+          gh api repos/$REPO/actions/runs/$run_id -X DELETE >/dev/null
+    env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run_id  : ${{ github.event.inputs.workflow_id }}
