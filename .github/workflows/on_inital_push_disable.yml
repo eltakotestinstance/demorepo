@@ -1,0 +1,63 @@
+name: Setup Branch Protection
+on:
+  push:
+    branches:
+      - main
+permissions: write-all
+jobs:
+  protect:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.head_commit.message  == 'Initial commit' }}
+    steps:
+      - name: Protect main branch on repo init
+        run: |
+          curl \
+            -X PUT \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token  $GH_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }}/branches/main/protection \
+            -d '{
+              required_status_checks: {
+                strict: false,
+                "contexts":["continuous-integration/travis-ci"]
+              },
+              "enforce_admins": true,
+              "required_pull_request_reviews": {
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "required_approving_review_count": 2
+              },
+              "restrictions": {
+                "users": ["saige-jochen-auticon"],
+                "teams": ["auticon-germany"]
+              }
+            }'
+      - name: Protect develop branch on repo init
+        run: |
+          curl \
+            -X PUT \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token  $GH_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }}/branches/develop/protection \
+            -d '{
+              required_status_checks: {
+                strict: false,
+                "contexts":["continuous-integration/travis-ci"]
+              },
+              "enforce_admins": true,
+              "required_pull_request_reviews": {
+                "dismiss_stale_reviews": true,
+                "require_code_owner_reviews": true,
+                "required_approving_review_count": 2
+              },
+              "restrictions": {
+                "users": ["saige-jochen-auticon"],
+                "teams": ["auticon-germany"]
+              }
+            }'
+      - name: disable workflow
+        run: |
+           gh workflow disable -R $GITHUB_REPOSITORY "${{ github.workflow }}"
+    env:
+      GH_TOKEN: ${{ secrets.PERSONAL_TOKEN_GITHUB }}
+      
